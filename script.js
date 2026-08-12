@@ -94,12 +94,13 @@ function drawIncomeExpenseChart(container, data) {
   makePath(expenses, '#F59E0B');
   makePath(income, '#4F46E5');
 
+  const labelFontSize = w < 340 ? 9 : 11.5;
   months.forEach((m, i) => {
     const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     t.setAttribute('x', x(i));
     t.setAttribute('y', h - 6);
     t.setAttribute('text-anchor', 'middle');
-    t.setAttribute('font-size', '11.5');
+    t.setAttribute('font-size', String(labelFontSize));
     t.setAttribute('fill', '#8A8A96');
     t.setAttribute('font-family', 'Manrope, sans-serif');
     t.setAttribute('font-weight', '600');
@@ -125,6 +126,47 @@ function renderRecentTransactions() {
       <div class="tx-amount ${tx.amountClass}">${tx.amountDisplay}</div>
     </li>
   `).join('');
+}
+
+function initMobileNav() {
+  const toggle = document.getElementById('menuToggle');
+  const drawer = document.getElementById('sidebarNav');
+  const overlay = document.getElementById('sidebarOverlay');
+  if (!toggle || !drawer || !overlay) return;
+
+  const isOpen = () => drawer.classList.contains('open');
+
+  const openDrawer = () => {
+    drawer.classList.add('open');
+    overlay.classList.add('open');
+    toggle.setAttribute('aria-expanded', 'true');
+    document.body.classList.add('nav-open');
+  };
+
+  const closeDrawer = () => {
+    drawer.classList.remove('open');
+    overlay.classList.remove('open');
+    toggle.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('nav-open');
+  };
+
+  toggle.addEventListener('click', () => {
+    isOpen() ? closeDrawer() : openDrawer();
+  });
+
+  overlay.addEventListener('click', closeDrawer);
+
+  drawer.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', closeDrawer);
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && isOpen()) closeDrawer();
+  });
+
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 860 && isOpen()) closeDrawer();
+  });
 }
 
 function initDashboard() {
@@ -253,6 +295,7 @@ function initTransactionsPage() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  initMobileNav();
   initDashboard();
   initTransactionsPage();
 });
